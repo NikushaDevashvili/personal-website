@@ -1,0 +1,108 @@
+---
+title: "My Thesis on Non-Deterministic Software"
+date: "2024-12-17"
+description: "Exploring the challenges and differences between deterministic and non-deterministic software systems, with a focus on AI agents and hallucinations"
+tags: ["ai", "software", "deterministic", "non-deterministic", "llm"]
+---
+
+Entropy is all around us, and the software is not exception. Once we produce any piece of program it needs continuous maintenance and for that reason we don't hire developers only for the creations sake. Scene was nearly the same from 2010 to 2022 until AI was embedded in most of the systems we use daily, and as the time passes it strengthens its roots into the systems.
+
+## How Deterministic Systems Work
+
+Most of the time we have input, then the system applies deterministic logic (code) and it gives us output. Simplest example could be:
+
+- User clicks on the button
+- Code runs:
+
+```javascript
+if (price < 100) {
+  applyDiscount();
+}
+```
+
+- Button either works or it doesn't
+- If it fails, you can see the error in the logs immediately
+- Then you can reproduce it with the same input and you'll get the same output always.
+
+## Non-Deterministic Software
+
+In case of non deterministic software we still receive the input but instead of normal logic we use non-deterministic model (llm/agent) and that itself consists of (reasoning, memory, tool calls, token sampling, randomness), so we can receive the desired output. Simple example of this:
+
+- User asks: "Help me with my expenses"
+- AI agent reasons: "I need to call database, check permissions, call API, etc…."
+- Agent calls tools in a sequence
+- Then we receive the output.
+
+But there are key considerations we need to make in order to truly maintain capable systems:
+
+- Tool calling can fail at any point
+- Unlike the deterministic systems same input can produce different output each time
+- If it fails you might not see it immediately (why? ?? ? ? ? ?? ?)
+- You cannot reproduce it: same input = different output or failure mode.
+
+Above are the core differences.
+
+## The Problem of Hallucinations
+
+One of the problem we face today is hallucinations. (The LLM makes stuff up) meaning that model confidently generates false information.
+
+But the question is why? What lies under it? So here is how it happens:
+
+- LLMs are trained to predict the next word statistically
+- They're incentivized to "make a guess" even when they lack information
+- The transformer architecture doesn't know the difference between facts and fabrications (learn about this)
+
+Here is the simple example to illustrate this:
+
+- User: "What's our refund policy?"
+- Agent reasoning: "User asked about refund policy. I should check database…"
+- Agent action: Calls database… gets no result
+- Agent hallucinates: Generates plausible-sounding policy that doesn't EXIST.
+- User receives wrong information and company gets complaint
+
+## Tool Hallucination
+
+Besides this kind of hallucination there exists Tool Hallucination(when the agent decides to use a tool that doesn't exist or uses it with wrong parameters). Here is how it happens:
+
+- Let's say agent has 10 available tools
+- LLM must choose which tool to call based on descriptions
+- LLM gets confused by overlapping tool descriptions
+- Calls wrong tool or calls tool with malformed parameters.
+
+Here is the simple example to illustrate this:
+
+- Let's say that agent has available tools such as: `fetch_user_data`, `update_user_name`, `send_email`.
+- Agent thinks: "I need to update user's name and notifyy them"
+- Agent hallucinates: Calls "update_user_and_notify_user" (such tool doesn't exist)
+- Result: Error, user data doesn't get updated.
+
+Problem is that company that uses Datadog can't catch this, API error will be logged for sure, but it won't understand that this is the systemic pattern on tool selection failures but the tool that specializes in AI observability can track: which tools agent choose, whether they exist, wether parameters are valid and builds patterns over thousands of calls.
+
+## What You Miss with Generic Telemetry (Datadog, etc.)
+
+You see HTTP 200s, DB query times, infra metrics but:
+
+- You don't see what the agent thought,
+- Which tools it picked,
+- Whether the answer matched evidence.
+
+You mostly miss silent failures such as (hallucinations, wrong tools, context overflow) and your infra looks "green".
+
+## With Agent-Specific Telemetry You Get the Extras
+
+- Visibility into behavioral signals:
+- Reasoning steps,
+- Tool decisions,
+- Retrieval results,
+- User feedback
+
+And the ability to:
+
+- Quickly debug a single incident via traces,
+- And statistically detect recurring patters (clusters) across thousands of interactions.
+
+It's the conceptual jump from: "is the server healthy?" -> "is the agent behaving correctly"?
+
+To make a parallel to the physical world: traditional monitor watches the planes instruments such as (speed, altitude, fuel). We watch the pilot's thinking. Instruments can be green and healthy while pilot flies towards the mountain, we control what happens inside pilots thinking.
+
+Some things in system has huge priority, for example most companies use different models at the same time, it is vital for them to control how each model think, plan and execute. One can show no error or if it does it can be error 200 or something similar. When we watch all the incoming events for each trace we try to see what tools were called, how system chooses model and how system prompts correspond to it. By having lot's of traces we can analyze which model should be prioritized for automatic selection, which prompt works best and additionally recommend how you can save/optimize cost for each input/output token.
