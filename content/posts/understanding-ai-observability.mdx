@@ -76,3 +76,80 @@ const [userStream, trackerStream] = originalStream.tee();
 
 - **userStream:** You give this back to the app immediately. The app consumes it at full speed.
 - **raindropStream:** You keep this. You read it slowly in the background to analyze hallucinations.
+
+## My achievements so far Dec 26
+
+# Simulation of startup
+
+- I created simulation of a startup that operates in the flights industry, the first thing i did is that
+  I created nextjs project (as most startups do), installed Vercel AI SDK with gpt. checked if AI responded with good answers,
+  but this for sure is not enough
+
+## RAG with only R
+
+- All the companies that will be our clients will have context provided to the AI systems, so I did the same but locally
+- I created the context and instructions separately for the AI so I could control response
+  but I don't really care about the responses at this point, I needed context for deBERTA, just a reminder Here
+  deBERTA works well on if it has these three pilars: user query provided, context and response, with these three info we can say if model hallucinates or not!
+
+## local SDK testing
+
+- initially I wanted to understand how SDK's work, actually I thought it was hard but now I see it really is not, and it has some main functions of them is
+
+```
+async track(
+    event: {
+      query: string;
+      context?: string;
+      model?: string;
+      metadata?: Record<string, any>;
+    },
+```
+
+with this I track three most important pillars: query, context and model.
+
+here are some more important snippets from code (mainly this are for running the action, safety checks, returning streams, teeing the stream, etc..)
+
+```
+  // 1. Run the action
+    const originalResponse = await action();
+```
+
+```
+    // 2. Safety check
+    if (!originalResponse.body) return originalResponse;
+```
+
+```
+    // 3. Tee the stream
+    const [stream1, stream2] = originalResponse.body.tee();
+```
+
+```
+    // 4. Capture in background (no await)
+    this.captureStream(stream2, event, traceId, startTime);
+```
+
+```
+    // 5. Return user stream
+    return new Response(stream1, {
+      headers: originalResponse.headers,
+      status: originalResponse.status,
+      statusText: originalResponse.statusText,
+    });
+```
+
+then we just send the trace (for now I don't send it anywhere as I'm trying to test everything locally, I just log the infos)
+
+```
+  private async sendTrace(payload: any) {
+    if (!this.isProduction) {
+      // In development mode, just log the trace data
+      console.log(
+        "[Observa] Trace captured:",
+        JSON.stringify(payload, null, 2)
+      );
+      return;
+    }
+  }
+```
