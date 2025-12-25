@@ -1,0 +1,78 @@
+---
+title: "Understanding AI observability"
+date: "2025-12-26"
+---
+
+# Understanding AI observability
+
+I want to fully grasp the concept of AI telemetry and observability. I want to understand the concept not from the high but low level. In order to do that I will be using: first principles thinking methodology, but this is only the first part of the process, second and even more important is: learn about the concept by building it.
+
+## The Builder's Mindset
+
+I have my own view on building things. When we look at any object that get’s built daily: such as car, or even tinier thing: watch, we think we have it for granted and producing it is just putting some details together, but in reality once you start building you have to understand all the tiniest components and how they work.
+
+When I was around 17-18 years old I wanted to build a model rocket, I order Handbook of model rocketry from USA, read some parts, watched YouTube videos and concluded that it won’t be too complicated to build such a simple mechanism, but as I started building I had to:
+
+- Shop for a chemicals such as Potassium, I. Found location where I could buy it
+- Then I had to have a pan, I know it seems dumb to say getting a pan is hard but I borrowed it from a kitchen, when u mix potassium and sugar it has really strange form and puts lot’s of stains on pan, so I had to negotiate all this with my family members
+- I won’t list down all the preparation steps I took but I guess u get my point, everything seems easy until you get your hands down on it.
+
+Besides preparation I found out I had to understand how to work with materials such as: basswood, plastic pvc, how to control weight of the corpus, how to construct a parachute, how to create ignition system. So you see each of this topic needs understanding of its own.
+
+## Why Observability?
+
+Now I want to know about observability, why? Because I want to produce a product that will help companies to observe their AI and detect problems in their system. But how do I do that? Here is my plan.
+
+### 1. Create Simulation
+
+Create simulation of what companies could have: AI chat interface using vercel ai sdk , it will be a website where I’ll be able to chat with GPT for example. By building this I’ll at least understand small part of what companies have or could have.
+
+### 2. Create SDK
+
+Once I know what their architecture look like then I will be able to create SDK for observability, actually I can do this now as well but I think it will be like doing things blindfolded. Main reason of why I want to work on this is that I’ll understand which part of the code needs wrapping, how much time is needed to install the sdk itself, and effort needed to do configurations in the code (for example adding custom listeners), I learned about Teeing
+
+### 3. Classifier Model
+
+As soon as I have mvp of SDK developed then I need to work on the classifier model, actually I already tested small model named deBERTa. Main goal is to listen to what the SDK sends on our side mainly this things could be (tool callings, DB calls, context, user question and bot answers). With that I’ll be able to compare what bot got (if info from DB or internal system + tool calls + context gets into correlation with the answer that bot provided), I have to polish my skills in python, understand model loading, tokenizers, pooling, window sliding, gradient descent(maybe), k nearest neighbor and softmax, this is actually small part, I have to learn about techniques I don’t know about,
+
+### 4. Visuals and Interface
+
+Once I finish all the part mention above I guess I will have 80% of the work done, next step is working on visuals, I need to create interface that displays only the relevant information to the users. I want to have quick visual mockup in Figma, then I need to revise my forgotten skills in next.js and tailwind, I’ll just construct the visuals and make sure everything serves a purpose and users needs.
+
+### 5. Backend Integration
+
+Next part is learning about backend stuff to connect the info I receive and then refine to display it on my dashboard.
+
+## Next Steps and Market Research
+
+I don’t know about the next steps yet but in my current view it is as follows: prepare - landing page, demo of website and explanation of what it does, find companies at least more than 20+, try to get 4-5 founders and interview them, what are their current needs? How do their systems work?
+
+I guess I need to do interviewing part at first but I’m bit worried of interviewing guys from YC without having clear understanding of what I do. I guess if I get one or two good guys from Georgia and talk with them it would still give me a basic understanding of what they do and how they approach constructing reliable AI systems.
+
+## Understanding "Teeing"
+
+Teeing - River (the Data Stream) flowing to a Village (the User).
+
+- **The Problem:** You (Raindrop) want to test the water quality, but you cannot stop the river or the village will dry up.
+- **The Physics:** You cannot "read" the water twice. Once it flows past you, it's gone.
+- **The Solution:** You dig a small Canal sideways. You divert 1% of the water (or copy it) into a testing pool. The main river keeps flowing to the village at full speed.
+
+In Computer Science, this is called **Teeing** (named after a 'T' shaped pipe).
+
+Long before linux sysadmins had this problem, they wanted to see logs on the screen and at the same time save this log into log.txt file. So they were using Teeing method
+
+Echo would send the data
+Tee splitter it into two parts - Path A: would go into the screen so that user sees (“hello world”), Path B would go to log.txt (file would save log in this case: “hello world”)
+
+```
+echo “hello word” | tee log.txt
+```
+
+In our case it looks like this:
+
+```
+const [userStream, trackerStream] = originalStream.tee();
+```
+
+- **userStream:** You give this back to the app immediately. The app consumes it at full speed.
+- **raindropStream:** You keep this. You read it slowly in the background to analyze hallucinations.
