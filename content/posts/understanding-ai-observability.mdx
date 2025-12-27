@@ -153,3 +153,58 @@ then we just send the trace (for now I don't send it anywhere as I'm trying to t
     }
   }
 ```
+
+## Understanding TinyBird and sending traces in database
+
+Sending the traces from the customer facing app is a vital part, previously while I was testing how SDK code worked I would just log all the data in the terminal a that was it. Now what I’m trying to do is that when anybody installs our SDK it will send data to our database, we will store it and then analyze it with deBERT(this is one of the next step to develop).
+
+In order to implement TinyBird I had to understand a few things, CLI, commands provided by them, revised how docker containers work, how to host TinyBird locally, I stopped at this step but there are far more things to do in order to receive and store requests.
+
+I already try to think about multi tenant architecture, at this point it’s just an MVP but this is important thing to consider. If we go bit far, I can see that each tenant will have it’s own projects, not only one. So I need to consider this from the beginning. So now main goal is to set up TinyBird, lets do it!
+
+Multi-tenant management and options we can choose from
+
+When I kind of tested the sdk and how we can log traces from consumer AI apps, I started thinking about these: okay, we are going to work with the various companies, how do we make sure that all the observability logs gets stored into safe database? What could be the structure of it? I could imagine easiest scenario, when we have only one company, but even as an MVP it wouldn’t work, even from the beginning I want our sdk backend to handle this: we can register ton’s of company, give them identifiers, let them install SDK, give them signatures and all of them can store traces in our database in a way that other companies can access it.
+
+Choosing between different tenant architectures
+
+1. Multi-tenant (shared runtime) - with this we get dedicated app + infra per customer, we get very high isolation (physical separation), it is not cost efficient (infra per tenant) and it’s operationally hard to maintain (we have many environments), as I learned it’s best for regulated industries (in future we may need to switch to this architecture as we will be serving in the fields of medicine, law, etc…), best for top tier enterprise customers. Main risks are: slow oboarding(which we can’t handle now, we need to acquire companies fast), linear ops burder, hard to keep parity across tenants.
+
+I chose multi-tenant architecture but I also had to understand how we generate identifiers for each company, so I came to conclusion with the help of perplexity and cursor that we need to use: we have to always generate JWT and Tinibytd keys and after the we will have Tenant ID and Project ID:
+
+JWT API Key
+
+- It starts with eyj and the format looks like this eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5hbnRJZCI6...
+- What it is: a JWT that encodes tenant/project info
+- Who creates it: our backend (using TokenService.generateToken())
+- Who uses it? Our customers (in their code with SDK)
+- Where it lives? In customers codebase mainly in environment variables
+- What it encodes exactly? tenantId, projectId, environment (dev / prod)
+- What it does: Tells our backend which tenant/project the request is for
+
+We can think of this as a customer ID card that says “I’m customer #123, project #456” — our backend reads this to know where the data belongs
+
+Tinybird token
+
+- It starts with p. And format looks like this p.eyJ1IjogImVmNGNj... its actually pretty long key
+- What it is? This is a Tinybird’s authentication token
+- Who creates it: we do, in the Tinybird UI or via API
+- Who uses it: our backend, to write data
+- Where it lives? It lives in our backend’s memory/database (is mapped to tenant)
+- What it actually do? It allows us to write in the database through Tinybird’s API
+
+Tenant ID
+
+- Format: UUID like b7a6660e-74c0-4ed9-8deb-612684ce6d67
+- What it is: Unique identifier for a customer/company
+- Created when: Tenant is created (via createTenant())
+- Used for: Grouping all data for that customer
+
+Project ID
+
+- Format: UUID like 480de02d-6b5f-462e-b935-bd8174dae35f
+- What it is: Unique identifier for a project under a tenant
+- Created when: Project is created (via createProject())
+- Used for: Organizing data within a tenant (e.g., "Production" vs "Development")
+
+Mainly we have two types of let’s say API tokens. One that we use to identify customers:
