@@ -498,7 +498,7 @@ scrubSecrets(trace.data, tenant.sensitivity_rules)
 - **Session validation:** ~100ms (cache hit) - **5x faster**
 - **Dashboard queries:** ~300-500ms (cache hit) - **6x faster**
 - **Schema initialization:** Removed from request path
-- **Request overhead:** Reduced from 5500ms to <100ms
+- **Request overhead:** Reduced from 5500ms to &lt;100ms
 
 ### Caching Strategy
 
@@ -652,16 +652,16 @@ PORT=3000
 
 ### Performance Metrics
 
-- **API Response Time:** <100ms (p95) with caching
-- **Dashboard Load Time:** <500ms (p95)
-- **Trace Detail Load:** <2s (p95)
+- **API Response Time:** &lt;100ms (p95) with caching
+- **Dashboard Load Time:** &lt;500ms (p95)
+- **Trace Detail Load:** &lt;2s (p95)
 - **Query Speedup:** 5-6x from caching
 
 ### Reliability Metrics
 
 - **Uptime Target:** 99.9% (Vercel + Neon)
-- **Error Rate:** <0.1% (Sentry monitored)
-- **Recovery Time:** <30s (fallback mechanisms)
+- **Error Rate:** &lt;0.1% (Sentry monitored)
+- **Recovery Time:** &lt;30s (fallback mechanisms)
 
 ### Usage Metrics (Projected)
 
