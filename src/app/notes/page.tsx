@@ -52,7 +52,7 @@ description: "A brief description"
             {posts.map((post) => (
               <Link
                 key={post.slug}
-                href={`/notes/${post.slug}`}
+                href={`/notes/${encodeURIComponent(post.slug)}`}
                 className="block p-6 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-lg transition-all bg-white dark:bg-gray-900/50"
               >
                 <h2 className="text-2xl font-semibold mb-2 text-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
